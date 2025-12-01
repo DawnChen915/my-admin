@@ -11,10 +11,42 @@
       >
         <template v-for="item in searchColumns" :key="item.key">
           <n-form-item :label="item.title" :path="item.key">
+            <!-- Select -->
+            <n-select
+              v-if="item.searchType === 'select'"
+              v-model:value="searchParam[item.key]"
+              :options="item.searchOptions"
+              :placeholder="`请选择${item.title}`"
+              clearable
+              v-bind="item.searchProps"
+              :style="{width:item.width?item.width+'px':'200px'}"
+            />
+            <!-- Date Picker -->
+            <n-date-picker
+              v-else-if="item.searchType === 'date'"
+              v-model:value="searchParam[item.key]"
+              type="date"
+              :placeholder="`请选择${item.title}`"
+              clearable
+              v-bind="item.searchProps"
+              class="w-full"
+            />
+            <!-- Time Picker -->
+            <n-time-picker
+              v-else-if="item.searchType === 'time'"
+              v-model:value="searchParam[item.key]"
+              :placeholder="`请选择${item.title}`"
+              clearable
+              v-bind="item.searchProps"
+              class="w-full"
+            />
+            <!-- Default: Input -->
             <n-input
+              v-else
               v-model:value="searchParam[item.key]"
               :placeholder="`请输入${item.title}`"
               clearable
+              v-bind="item.searchProps"
             />
           </n-form-item>
         </template>
@@ -53,13 +85,12 @@
 
       <!-- 表格 -->
       <n-data-table
-        :columns="columns"
+        :columns="tableColumns"
         :data="tableData"
         :loading="loading"
         :pagination="false"
         :bordered="true"
         :single-line="false"
-     
       />
 
       <!-- 分页 -->
@@ -74,9 +105,7 @@
           @update:page="handleCurrentChange"
           @update:page-size="handleSizeChange"
         >
-          <template #prefix="{ itemCount }">
-            共 {{ itemCount }} 条
-          </template>
+          <template #prefix="{ itemCount }"> 共 {{ itemCount }} 条 </template>
         </n-pagination>
       </div>
     </n-card>
@@ -84,35 +113,55 @@
 </template>
 
 <script setup>
-import { computed, onMounted, h, watch } from 'vue'
-import { useTable } from '../../hooks/useTable'
-import { NIcon } from 'naive-ui'
+import { computed, onMounted, h, watch, useSlots } from "vue";
+import { useTable } from "../../hooks/useTable";
+import { NIcon } from "naive-ui";
+
+const slots = useSlots();
 
 const props = defineProps({
   columns: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   requestApi: {
     type: Function,
-    required: true
+    required: true,
   },
   initParam: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
   title: {
     type: String,
-    default: ''
-  }
-})
+    default: "",
+  },
+});
+
+// 处理列配置，支持 slot
+const tableColumns = computed(() => {
+  return props.columns.map((item) => {
+    // 如果有自定义 render，直接返回
+    if (item.render) return item;
+    // 如果有对应的 slot，使用 slot 渲染
+    if (slots[item.key]) {
+      return {
+        ...item,
+        render(row) {
+          return slots[item.key]({ row });
+        },
+      };
+    }
+    return item;
+  });
+});
 
 // 过滤出需要搜索的列
 const searchColumns = computed(() => {
-  return props.columns.filter(item => item.search)
-})
+  return props.columns.filter((item) => item.search);
+});
 
-const showSearch = computed(() => searchColumns.value.length > 0)
+const showSearch = computed(() => searchColumns.value.length > 0);
 
 // 使用 hook
 const {
@@ -124,27 +173,25 @@ const {
   reset,
   getTableList,
   handleSizeChange,
-  handleCurrentChange
-} = useTable(props.requestApi, props.initParam)
+  handleCurrentChange,
+} = useTable(props.requestApi, props.initParam);
 watch(
   () => tableData.value,
-  (newVal) => {
-
-  },
+  (newVal) => {},
   { deep: true, immediate: true }
-)
+);
 
 // 初始化加载
 onMounted(() => {
-  getTableList()
-})
+  getTableList();
+});
 
 // 暴露给父组件
 defineExpose({
   search,
   reset,
-  getTableList
-})
+  getTableList,
+});
 </script>
 
 <style scoped>

@@ -18,6 +18,13 @@
     </div>
     <div class="right">
       <n-space align="center" size="large">
+        <n-button quaternary circle size="small" @click="toggleFullscreen">
+          <template #icon>
+            <n-icon>
+              <div :class="isFullscreen ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen'" />
+            </n-icon>
+          </template>
+        </n-button>
         <n-button quaternary circle size="small" @click="toggleTheme">
           <template #icon>
             <n-icon>
@@ -61,6 +68,7 @@ import { useMessage } from "naive-ui";
 import { useUserStore } from "@/store/modules/user";
 import { useTheme } from "@/hooks/useTheme";
 import { useSettingStore } from "@/store/modules/setting";
+import { useFullscreen } from "@vueuse/core";
 
 const router = useRouter();
 const route = useRoute();
@@ -68,6 +76,7 @@ const message = useMessage();
 const userStore = useUserStore();
 const settingStore = useSettingStore();
 const { isDark, toggleTheme } = useTheme();
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 
 const emit = defineEmits(["openSettings"]);
 

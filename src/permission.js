@@ -2,6 +2,11 @@ import router from './router'
 import { useUserStore } from './store/modules/user'
 import { usePermissionStore } from './store/modules/permission'
 import { createDiscreteApi } from 'naive-ui'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+// NProgress 配置
+NProgress.configure({ showSpinner: false })
 
 // 创建独立的 loading bar 实例 (因为不在 setup 中)
 const { loadingBar } = createDiscreteApi(['loadingBar'])
@@ -9,6 +14,7 @@ const { loadingBar } = createDiscreteApi(['loadingBar'])
 const whiteList = ['/login', '/404'] // 白名单
 
 router.beforeEach(async (to, from, next) => {
+  NProgress.start()
   loadingBar.start()
   
   const userStore = useUserStore()
@@ -20,6 +26,7 @@ router.beforeEach(async (to, from, next) => {
       // 已登录，跳转首页
       next({ path: '/' })
       loadingBar.finish()
+      NProgress.done()
     } else {
       // 判断是否已获取用户信息
       const hasRoles = userStore.roles && userStore.roles.length > 0
@@ -46,6 +53,7 @@ router.beforeEach(async (to, from, next) => {
           await userStore.logout()
           next(`/login?redirect=${to.path}`)
           loadingBar.error()
+          NProgress.done()
         }
       }
     }
@@ -56,10 +64,12 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next(`/login?redirect=${to.path}`)
       loadingBar.finish()
+      NProgress.done()
     }
   }
 })
 
 router.afterEach(() => {
   loadingBar.finish()
+  NProgress.done()
 })

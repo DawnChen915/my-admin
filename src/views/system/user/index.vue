@@ -8,7 +8,7 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader>
-        <n-button type="primary" @click="handleAdd">
+        <n-button type="primary" v-auth="['admin']" @click="handleAdd">
           <template #icon>
             <n-icon><div class="i-mdi-plus" /></n-icon>
           </template>
@@ -63,6 +63,11 @@ const columns = [
     key: 'gender',
     width: 100,
     search: true,
+    searchType: 'select',
+    searchOptions: [
+      { label: '男', value: '男' },
+      { label: '女', value: '女' }
+    ],
     render(row) {
       const icon = row.gender === '男' ? 'i-mdi-face-man' : 'i-mdi-face-woman'
       const color = row.gender === '男' ? '#2080f0' : '#d03050'
@@ -104,40 +109,19 @@ const columns = [
   {
     title: '创建时间',
     key: 'createTime',
-    width: 180
+    width: 180,
+    search: true,
+    searchType: 'date',
+    searchProps: {
+      type: 'daterange',
+      valueFormat: 'yyyy-MM-dd'
+    }
   },
   {
     title: '操作',
     key: 'action',
     width: 150,
-    fixed: 'right',
-    render(row) {
-      // 这里为了演示方便，直接使用 h 函数渲染按钮
-      // 实际开发中，ProTable 内部可以支持 slot 渲染，我们在 ProTable 组件里稍微改一下
-      // 目前 ProTable 还没支持 slot 渲染列内容，我们先用 render 函数
-      return h(
-        'div',
-        { style: 'display: flex; gap: 8px;' },
-        [
-          h(
-            'button',
-            {
-              style: 'color: #2080f0; border: none; background: none; cursor: pointer;',
-              onClick: () => handleEdit(row)
-            },
-            '编辑'
-          ),
-          h(
-            'button',
-            {
-              style: 'color: #d03050; border: none; background: none; cursor: pointer;',
-              onClick: () => handleDelete(row)
-            },
-            '删除'
-          )
-        ]
-      )
-    }
+    fixed: 'right'
   }
 ]
 

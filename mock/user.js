@@ -9,7 +9,7 @@ for (let i = 0; i < 100; i++) {
     age: 20 + (i % 10),
     gender: i % 2 === 0 ? '男' : '女',
     role: i % 3 === 0 ? 'admin' : 'user',
-    createTime: '2023-01-01',
+    createTime: `2023-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
     status: i % 4 === 0 ? 0 : 1 // 0: 禁用, 1: 启用
   })
 }
@@ -56,7 +56,7 @@ export default [
     method: 'post',
     response: ({ body }) => {
       // 给分页参数设置默认值，防止参数缺失导致 slice 计算错误
-      const { pageNum = 1, pageSize = 10, username, gender } = body || {}
+      const { pageNum = 1, pageSize = 10, username, gender, createTime } = body || {}
       
       let list = userList
 
@@ -66,6 +66,10 @@ export default [
       }
       if (gender) {
         list = list.filter(item => item.gender === gender)
+      }
+      if (createTime && createTime.length === 2) {
+        const [start, end] = createTime
+        list = list.filter(item => item.createTime >= start && item.createTime <= end)
       }
 
       const total = list.length

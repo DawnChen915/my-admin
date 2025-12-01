@@ -111,7 +111,11 @@ export const useTable = (api, initParam = {}, isPageable = true, dataCallBack) =
    * */
   const reset = () => {
     state.pageable.pageNum = 1
-    state.searchParam = { ...state.initSearchParam }
+    // 重置搜索表单，使用 initSearchParam
+    Object.keys(state.searchParam).forEach((key) => {
+      const initValue = state.initSearchParam[key]
+      state.searchParam[key] = initValue !== undefined ? initValue : null
+    })
     updatedTotalParam()
     getTableList()
   }

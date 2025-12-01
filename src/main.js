@@ -5,10 +5,12 @@ import 'virtual:uno.css'
 import './style.css'
 import App from './App.vue'
 import './permission' // 引入路由守卫
+import directives from './directives'
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+app.use(directives)
 
 app.mount('#app')
