@@ -1,0 +1,14 @@
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import router from './router'
+import 'virtual:uno.css'
+import './style.css'
+import App from './App.vue'
+import './permission' // 引入路由守卫
+
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')
