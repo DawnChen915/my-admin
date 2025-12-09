@@ -56,7 +56,7 @@ export default [
     method: 'post',
     response: ({ body }) => {
       // 给分页参数设置默认值，防止参数缺失导致 slice 计算错误
-      const { pageNum = 1, pageSize = 10, username, gender, createTime } = body || {}
+      const { pageNum = 1, pageSize = 10, username, gender,status, createTime } = body || {}
       
       let list = userList
 
@@ -66,6 +66,9 @@ export default [
       }
       if (gender) {
         list = list.filter(item => item.gender === gender)
+      }
+      if (status !== undefined) {
+        list = list.filter(item => item.status === status)
       }
       if (createTime && createTime.length === 2) {
         const [start, end] = createTime

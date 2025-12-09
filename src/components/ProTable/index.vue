@@ -113,9 +113,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, h, watch, useSlots } from "vue";
+import { computed, onMounted, h, watch, useSlots, unref } from "vue";
 import { useTable } from "../../hooks/useTable";
-import { NIcon } from "naive-ui";
+import { NIcon, NTag } from "naive-ui";
 
 const slots = useSlots();
 
@@ -138,7 +138,7 @@ const props = defineProps({
   },
 });
 
-// 处理列配置，支持 slot
+// 处理列配置，支持 slot 和 enum 自动渲染
 const tableColumns = computed(() => {
   return props.columns.map((item) => {
     // 如果有自定义 render，直接返回
@@ -152,13 +152,48 @@ const tableColumns = computed(() => {
         },
       };
     }
+    // 如果有 enum，自动渲染 label
+    if (item.enum) {
+      return {
+        ...item,
+        render(row) {
+          const value = row[item.key];
+          if (!value && value !== 0) return "--";
+          // 兼容 enum 为 Ref 的情况
+          const enumData = unref(item.enum);
+          const dictItem = enumData.find((v) => v.value === value);
+          if (dictItem) {
+            if (dictItem.tagType) {
+              return h(
+                NTag,
+                { type: dictItem.tagType, bordered: false },
+                { default: () => dictItem.label }
+              );
+            }
+            return dictItem.label;
+          }
+          return value;
+        },
+      };
+    }
     return item;
   });
 });
 
 // 过滤出需要搜索的列
 const searchColumns = computed(() => {
-  return props.columns.filter((item) => item.search);
+  return props.columns
+    .filter((item) => item.search)
+    .map((item) => {
+      // 如果有 enum 且没有 searchOptions，自动使用 enum 作为 options
+      if (item.enum && !item.searchOptions) {
+        return {
+          ...item,
+          searchOptions: unref(item.enum), // 兼容 Ref
+        };
+      }
+      return item;
+    });
 });
 
 const showSearch = computed(() => searchColumns.value.length > 0);
