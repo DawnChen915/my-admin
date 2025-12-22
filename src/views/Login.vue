@@ -3,8 +3,8 @@
     <div class="login-container">
       <n-card title="系统登录" bordered hoverable size="large" style="width: 400px">
         <n-form ref="formRef" :model="model" :rules="rules">
-          <n-form-item path="username" label="用户名">
-            <n-input v-model:value="model.username" placeholder="请输入用户名" />
+          <n-form-item path="username" label="用户名/邮箱">
+            <n-input v-model:value="model.username" placeholder="请输入用户名或邮箱" />
           </n-form-item>
           <n-form-item path="password" label="密码">
             <n-input
@@ -29,6 +29,16 @@
               </div>
             </n-col>
           </n-row>
+          <n-row :gutter="[0, 12]">
+            <n-col :span="24">
+              <div style="display: flex; justify-content: center; margin-top: 16px">
+                <span style="color: #666">还没有账号？</span>
+                <router-link to="/register" style="margin-left: 8px; color: #18a058; text-decoration: none">
+                  立即注册
+                </router-link>
+              </div>
+            </n-col>
+          </n-row>
         </n-form>
       </n-card>
     </div>
@@ -49,14 +59,14 @@ const formRef = ref(null)
 const loading = ref(false)
 
 const model = reactive({
-  username: 'admin',
-  password: '123'
+  username: '317262095@qq.com',
+  password: '123456'
 })
 
 const rules = {
   username: {
     required: true,
-    message: '请输入用户名',
+    message: '请输入用户名或邮箱',
     trigger: ['input', 'blur']
   },
   password: {
@@ -76,7 +86,7 @@ const handleLogin = (e) => {
         message.success('登录成功')
         router.push('/')
       } catch (error) {
-        message.error('登录失败')
+        // message.error('登录失败')
       } finally {
         loading.value = false
       }

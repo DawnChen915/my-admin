@@ -10,6 +10,12 @@ export const constantRoutes = [
     meta: { title: '登录', hidden: true }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/Register.vue'),
+    meta: { title: '注册', hidden: true }
+  },
+  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -73,7 +79,7 @@ export const asyncRoutes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: constantRoutes
 })
 

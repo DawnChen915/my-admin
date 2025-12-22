@@ -1,27 +1,41 @@
 import { defineStore } from 'pinia'
 import { login, getUserInfo, logout } from '../../api/user'
+import { usePermissionStore } from './permission'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     token: localStorage.getItem('token') || '',
+    refreshToken: localStorage.getItem('refreshToken') || '',
     name: '',
     avatar: '',
-    roles: []
+    roles: [],
+    userInfo: null
   }),
   actions: {
     // 登录
     login(userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(res => {
-          // 注意：这里假设 api 返回的是 res.data (因为拦截器里已经解包了)
-          // 但由于我们现在用的是模拟 Promise，没有走拦截器，所以直接取 res.data
-          // 如果切换到真实 request，拦截器返回的是 res.data，所以这里直接用 res 即可
-          // 为了兼容模拟数据，这里做个判断
           const data = res.data || res
           
+          // 保存 token 和 refreshToken
           this.token = data.token
           localStorage.setItem('token', data.token)
-          resolve()
+          
+          if (data.refreshToken) {
+            this.refreshToken = data.refreshToken
+            localStorage.setItem('refreshToken', data.refreshToken)
+          }
+          
+          // 保存用户信息
+          if (data.user) {
+            this.userInfo = data.user
+            this.name = data.user.name || data.user.username
+            this.avatar = data.user.avatar
+            this.roles = data.user.role ? [data.user.role] : ['user']
+          }
+          
+          resolve(data)
         }).catch(error => {
           reject(error)
         })
@@ -56,15 +70,34 @@ export const useUserStore = defineStore('user', {
     },
     // 退出登录
     logout() {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         logout().then(() => {
-          this.token = ''
-          this.roles = []
-          localStorage.removeItem('token')
+          this.resetToken()
           resolve()
-        }).catch(error => {
-          reject(error)
+        }).catch((error) => {
+          // 即使后端调用失败，也要清除本地的登录状态
+          console.error('Logout API failed, clearing local state:', error)
+          this.resetToken()
+          resolve()
         })
+      })
+    },
+    // 重置 token
+    resetToken() {
+      return new Promise(resolve => {
+        const permissionStore = usePermissionStore()
+        
+        this.token = ''
+        this.refreshToken = ''
+        this.roles = []
+        this.userInfo = null
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
+        
+        // 清除权限路由
+        permissionStore.resetRoutes()
+        
+        resolve()
       })
     }
   }

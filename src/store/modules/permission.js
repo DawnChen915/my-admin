@@ -55,6 +55,11 @@ export const usePermissionStore = defineStore('permission', {
         this.routes = constantRoutes.concat(accessedRoutes)
         resolve(accessedRoutes)
       })
+    },
+    // 重置路由
+    resetRoutes() {
+      this.routes = []
+      this.addRoutes = []
     }
   }
 })

@@ -18,10 +18,10 @@ export default defineConfig({
   plugins: [
     vue(),
     UnoCSS(),
-    viteMockServe({
-      mockPath: 'mock',
-      localEnabled: true,
-    }),
+    // viteMockServe({
+    //   mockPath: 'mock',
+    //   localEnabled: true,
+    // }),
     AutoImport({
       imports: [
         'vue',
